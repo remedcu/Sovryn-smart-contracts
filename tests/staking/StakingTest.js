@@ -8,7 +8,7 @@ const EIP712 = require("../Utils/EIP712");
 const { getAccountsPrivateKeysBuffer } = require("../Utils/hardhat_utils");
 
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 const TestToken = artifacts.require("TestToken");
 const VestingLogic = artifacts.require("VestingLogic");
 
@@ -21,7 +21,7 @@ const TWO_WEEKS = 1209600;
 
 //const { ethers } = require("hardhat");
 
-contract("Staking", (accounts) => {
+contract("StakingTN", (accounts) => {
 	const name = "Test token";
 	const symbol = "TST";
 
@@ -50,7 +50,7 @@ contract("Staking", (accounts) => {
 		token = await TestToken.new(name, symbol, 18, TOTAL_SUPPLY);
 
 		let stakingLogic = await StakingLogic.new(token.address);
-		staking = await StakingProxy.new(token.address);
+		staking = await StakingProxyTN.new(token.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
@@ -93,7 +93,7 @@ contract("Staking", (accounts) => {
 				expiry = 0;
 			await expectRevert(
 				staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, 0, "0xbad", "0xbad"),
-				"Staking::delegateBySig: invalid signature"
+				"StakingTN::delegateBySig: invalid signature"
 			);
 		});
 
@@ -131,7 +131,7 @@ contract("Staking", (accounts) => {
 
 			await expectRevert(
 				staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, v, r, s),
-				"Staking::delegateBySig: invalid nonce"
+				"StakingTN::delegateBySig: invalid nonce"
 			);
 		});
 
@@ -154,7 +154,7 @@ contract("Staking", (accounts) => {
 			);
 			await expectRevert(
 				staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, v, r, s),
-				"Staking::delegateBySig: signature expired"
+				"StakingTN::delegateBySig: signature expired"
 			);
 		});
 

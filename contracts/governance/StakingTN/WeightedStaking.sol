@@ -5,14 +5,14 @@ import "./Checkpoints.sol";
 import "../../openzeppelin/Address.sol";
 
 /**
- * @title Weighted Staking contract.
+ * @title Weighted StakingTN contract.
  * @notice Computation of power and votes used by FeeSharingProxy and
- * GovernorAlpha and Staking contracts w/ mainly 3 public functions:
+ * GovernorAlpha and StakingTN contracts w/ mainly 3 public functions:
  *   + getPriorTotalVotingPower => Total voting power.
  *   + getPriorVotes  => Delegatee voting power.
  *   + getPriorWeightedStake  => User Weighted Stake.
- * Staking contract inherits WeightedStaking.
- * FeeSharingProxy and GovernorAlpha invoke Staking instance functions.
+ * StakingTN contract inherits WeightedStaking.
+ * FeeSharingProxy and GovernorAlpha invoke StakingTN instance functions.
  * */
 contract WeightedStaking is Checkpoints {
 	using Address for address payable;
@@ -290,7 +290,7 @@ contract WeightedStaking is Checkpoints {
 	/**
 	 * @notice Determine the prior number of stake for an account until a
 	 * 		certain lock date as of a block number.
-	 * @dev All functions of Staking contract use this internal version,
+	 * @dev All functions of StakingTN contract use this internal version,
 	 * 		we need to modify public function in order to workaround issue with Vesting.withdrawTokens:
 	 * return 1 instead of 0 if message sender is a contract.
 	 * */
@@ -352,7 +352,7 @@ contract WeightedStaking is Checkpoints {
 	function computeWeightByDate(uint256 date, uint256 startDate) public pure returns (uint96 weight) {
 		require(date >= startDate, "WeightedStaking::computeWeightByDate: date needs to be bigger than startDate");
 		uint256 remainingTime = (date - startDate);
-		require(MAX_DURATION >= remainingTime, "Staking::computeWeightByDate:remaining time can't be bigger than max duration");
+		require(MAX_DURATION >= remainingTime, "StakingTN::computeWeightByDate:remaining time can't be bigger than max duration");
 		/// @dev x = max days - remaining days
 		uint96 x = uint96(MAX_DURATION - remainingTime) / (1 days);
 		/// @dev w = (m^2 - x^2)/m^2 +1 (multiplied by the weight factor)

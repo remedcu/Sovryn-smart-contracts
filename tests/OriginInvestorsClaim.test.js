@@ -4,8 +4,8 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 
 const { mineBlock, setNextBlockTimestamp } = require("./Utils/Ethereum");
 
-const StakingLogic = artifacts.require("Staking");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingLogic = artifacts.require("StakingTN");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 const SOV_ABI = artifacts.require("SOV");
 const TestToken = artifacts.require("TestToken");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
@@ -103,7 +103,7 @@ contract("OriginInvestorsClaim", (accounts) => {
 		cSOV2 = await TestToken.new("cSOV2", "cSOV2", 18, TOTAL_SUPPLY);
 
 		stakingLogic = await StakingLogic.new(SOV.address);
-		staking = await StakingProxy.new(SOV.address);
+		staking = await StakingProxyTN.new(SOV.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 

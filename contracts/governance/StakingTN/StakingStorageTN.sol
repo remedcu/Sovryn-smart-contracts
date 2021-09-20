@@ -6,7 +6,7 @@ import "../../interfaces/IERC20.sol";
 import "../IFeeSharingProxy.sol";
 
 /**
- * @title Staking Storage contact.
+ * @title StakingTN Storage contact.
  * @notice Just the storage part of stacking contract, no functions,
  * only constant, variables and required structures (mappings).
  * Used by StackingProxy and Checkpoints contracts.
@@ -20,7 +20,7 @@ import "../IFeeSharingProxy.sol";
  * voting rights in the Bitocracy. Stakers are further incentivised through
  * fee and slashing rewards.
  * */
-contract StakingStorage is Ownable {
+contract StakingStorageTN is Ownable {
 	/// @notice 2 weeks in seconds.
 	uint256 constant TWO_WEEKS = 1209600;
 

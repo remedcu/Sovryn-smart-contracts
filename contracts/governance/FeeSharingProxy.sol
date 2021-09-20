@@ -1,14 +1,14 @@
 pragma solidity ^0.5.17;
 
-import "./Staking/SafeMath96.sol";
+import "./StakingTN/SafeMath96.sol";
 import "../openzeppelin/SafeMath.sol";
 import "../openzeppelin/SafeERC20.sol";
 import "./IFeeSharingProxy.sol";
-import "./Staking/IStaking.sol";
+import "./StakingTN/IStaking.sol";
 
 /**
  * @title The FeeSharingProxy contract.
- * @notice Staking is not only granting voting rights, but also access to fee
+ * @notice StakingTN is not only granting voting rights, but also access to fee
  * sharing according to the own voting power in relation to the total. Whenever
  * somebody decides to collect the fees from the protocol, they get transferred
  * to a proxy contract which invests the funds in the lending pool and keeps
@@ -143,7 +143,7 @@ contract FeeSharingProxy is SafeMath96, IFeeSharingProxy {
 
 		/// @notice Transfer tokens from msg.sender
 		bool success = IERC20(_token).transferFrom(address(msg.sender), address(this), _amount);
-		require(success, "Staking::transferTokens: token transfer failed");
+		require(success, "StakingTN::transferTokens: token transfer failed");
 
 		/// @notice Update unprocessed amount of tokens.
 		unprocessedAmount[_token] = add96(unprocessedAmount[_token], _amount, "FeeSharingProxy::transferTokens: amount exceeds 96 bits");

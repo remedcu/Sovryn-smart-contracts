@@ -32,20 +32,20 @@ def main():
     contracts = json.load(configFile)
     multisig = contracts['multisig']
     SOVAddress = contracts['SOV']
-    stakingAddress = contracts['Staking']
+    stakingAddress = contracts['StakingTN']
 
     balanceBefore = acct.balance()
 
-    # ================================ SOV Staking Rewards - SIP-0024 ===================================
+    # ================================ SOV StakingTN Rewards - SIP-0024 ===================================
 
     # deploy VestingRegistryLogic
-    stakingRewardsLogic = acct.deploy(StakingRewards)
-    stakingRewardsProxy = acct.deploy(StakingRewardsProxy)
+    stakingRewardsLogic = acct.deploy(StakingRewardsTN)
+    stakingRewardsProxy = acct.deploy(StakingRewardsProxyTN)
     stakingRewardsProxy.setImplementation(stakingRewardsLogic.address)
     stakingRewards = Contract.from_abi(
-        "StakingRewards",
+        "StakingRewardsTN",
         address=stakingRewardsProxy.address,
-        abi=StakingRewards.abi,
+        abi=StakingRewardsTN.abi,
         owner=acct)
 
     stakingRewards.initialize(SOVAddress, stakingAddress)

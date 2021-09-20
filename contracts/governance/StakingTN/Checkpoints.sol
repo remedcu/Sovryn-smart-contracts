@@ -1,7 +1,7 @@
 pragma solidity ^0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "./StakingStorage.sol";
+import "./StakingStorageTN.sol";
 import "./SafeMath96.sol";
 
 /**
@@ -9,7 +9,7 @@ import "./SafeMath96.sol";
  * @notice Increases and decreases storage values for users, delegatees and
  * total daily stake.
  * */
-contract Checkpoints is StakingStorage, SafeMath96 {
+contract Checkpoints is StakingStorageTN, SafeMath96 {
 	/// @notice An event emitted when an account changes its delegate.
 	event DelegateChanged(address indexed delegator, uint256 lockedUntil, address indexed fromDelegate, address indexed toDelegate);
 
@@ -52,7 +52,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 	) internal {
 		uint32 nCheckpoints = numUserStakingCheckpoints[account][lockedTS];
 		uint96 staked = userStakingCheckpoints[account][lockedTS][nCheckpoints - 1].stake;
-		uint96 newStake = add96(staked, value, "Staking::_increaseUserStake: staked amount overflow");
+		uint96 newStake = add96(staked, value, "StakingTN::_increaseUserStake: staked amount overflow");
 		_writeUserCheckpoint(account, lockedTS, nCheckpoints, newStake);
 	}
 
@@ -69,7 +69,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 	) internal {
 		uint32 nCheckpoints = numUserStakingCheckpoints[account][lockedTS];
 		uint96 staked = userStakingCheckpoints[account][lockedTS][nCheckpoints - 1].stake;
-		uint96 newStake = sub96(staked, value, "Staking::_decreaseUserStake: staked amount underflow");
+		uint96 newStake = sub96(staked, value, "StakingTN::_decreaseUserStake: staked amount underflow");
 		_writeUserCheckpoint(account, lockedTS, nCheckpoints, newStake);
 	}
 
@@ -86,7 +86,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 		uint32 nCheckpoints,
 		uint96 newStake
 	) internal {
-		uint32 blockNumber = safe32(block.number, "Staking::_writeStakingCheckpoint: block number exceeds 32 bits");
+		uint32 blockNumber = safe32(block.number, "StakingTN::_writeStakingCheckpoint: block number exceeds 32 bits");
 
 		if (nCheckpoints > 0 && userStakingCheckpoints[account][lockedTS][nCheckpoints - 1].fromBlock == blockNumber) {
 			userStakingCheckpoints[account][lockedTS][nCheckpoints - 1].stake = newStake;
@@ -109,7 +109,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 	) internal {
 		uint32 nCheckpoints = numDelegateStakingCheckpoints[delegatee][lockedTS];
 		uint96 staked = delegateStakingCheckpoints[delegatee][lockedTS][nCheckpoints - 1].stake;
-		uint96 newStake = add96(staked, value, "Staking::_increaseDelegateStake: staked amount overflow");
+		uint96 newStake = add96(staked, value, "StakingTN::_increaseDelegateStake: staked amount overflow");
 		_writeDelegateCheckpoint(delegatee, lockedTS, nCheckpoints, newStake);
 	}
 
@@ -134,7 +134,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 		//		(no delegation to another address).
 		// @dev It can be greater than 0, but inconsistent after 3 transactions
 		if (staked > value) {
-			newStake = sub96(staked, value, "Staking::_decreaseDelegateStake: staked amount underflow");
+			newStake = sub96(staked, value, "StakingTN::_decreaseDelegateStake: staked amount underflow");
 		}
 		_writeDelegateCheckpoint(delegatee, lockedTS, nCheckpoints, newStake);
 	}
@@ -152,7 +152,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 		uint32 nCheckpoints,
 		uint96 newStake
 	) internal {
-		uint32 blockNumber = safe32(block.number, "Staking::_writeStakingCheckpoint: block number exceeds 32 bits");
+		uint32 blockNumber = safe32(block.number, "StakingTN::_writeStakingCheckpoint: block number exceeds 32 bits");
 		uint96 oldStake = delegateStakingCheckpoints[delegatee][lockedTS][nCheckpoints - 1].stake;
 
 		if (nCheckpoints > 0 && delegateStakingCheckpoints[delegatee][lockedTS][nCheckpoints - 1].fromBlock == blockNumber) {
@@ -172,7 +172,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 	function _increaseDailyStake(uint256 lockedTS, uint96 value) internal {
 		uint32 nCheckpoints = numTotalStakingCheckpoints[lockedTS];
 		uint96 staked = totalStakingCheckpoints[lockedTS][nCheckpoints - 1].stake;
-		uint96 newStake = add96(staked, value, "Staking::_increaseDailyStake: staked amount overflow");
+		uint96 newStake = add96(staked, value, "StakingTN::_increaseDailyStake: staked amount overflow");
 		_writeStakingCheckpoint(lockedTS, nCheckpoints, newStake);
 	}
 
@@ -184,7 +184,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 	function _decreaseDailyStake(uint256 lockedTS, uint96 value) internal {
 		uint32 nCheckpoints = numTotalStakingCheckpoints[lockedTS];
 		uint96 staked = totalStakingCheckpoints[lockedTS][nCheckpoints - 1].stake;
-		uint96 newStake = sub96(staked, value, "Staking::_decreaseDailyStake: staked amount underflow");
+		uint96 newStake = sub96(staked, value, "StakingTN::_decreaseDailyStake: staked amount underflow");
 		_writeStakingCheckpoint(lockedTS, nCheckpoints, newStake);
 	}
 
@@ -199,7 +199,7 @@ contract Checkpoints is StakingStorage, SafeMath96 {
 		uint32 nCheckpoints,
 		uint96 newStake
 	) internal {
-		uint32 blockNumber = safe32(block.number, "Staking::_writeStakingCheckpoint: block number exceeds 32 bits");
+		uint32 blockNumber = safe32(block.number, "StakingTN::_writeStakingCheckpoint: block number exceeds 32 bits");
 
 		if (nCheckpoints > 0 && totalStakingCheckpoints[lockedTS][nCheckpoints - 1].fromBlock == blockNumber) {
 			totalStakingCheckpoints[lockedTS][nCheckpoints - 1].stake = newStake;

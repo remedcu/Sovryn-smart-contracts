@@ -3,8 +3,8 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 
 const { address, minerStart, minerStop, unlockedAccount, mineBlock, etherMantissa, etherUnsigned, setTime } = require("../Utils/Ethereum");
 
-const StakingLogic = artifacts.require("Staking");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingLogic = artifacts.require("StakingTN");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 const TestToken = artifacts.require("TestToken");
 
 const TOTAL_SUPPLY = "10000000000000000000000000";
@@ -30,7 +30,7 @@ contract("WeightedStaking", (accounts) => {
 		token = await TestToken.new(name, symbol, 18, TOTAL_SUPPLY);
 
 		let stakingLogic = await StakingLogic.new(token.address);
-		staking = await StakingProxy.new(token.address);
+		staking = await StakingProxyTN.new(token.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
@@ -164,7 +164,7 @@ contract("WeightedStaking", (accounts) => {
 			let result = await staking.stake("100", inOneYear, a3, a3, { from: a2 });
 			await expectRevert(
 				staking.getPriorTotalVotingPower(result.receipt.blockNumber, kickoffTS),
-				"Staking::getPriorTotalStakesForDate: not yet determined"
+				"StakingTN::getPriorTotalStakesForDate: not yet determined"
 			);
 		});
 	});
@@ -199,7 +199,7 @@ contract("WeightedStaking", (accounts) => {
 			let result = await staking.stake("100", inOneYear, a3, a3, { from: a2 });
 			await expectRevert(
 				staking.getPriorVotes(a3, result.receipt.blockNumber, kickoffTS),
-				"Staking::getPriorStakeByDateForDelegatee: not yet determined"
+				"StakingTN::getPriorStakeByDateForDelegatee: not yet determined"
 			);
 		});
 
@@ -243,7 +243,7 @@ contract("WeightedStaking", (accounts) => {
 			let result = await staking.stake("100", inOneYear, a3, a3, { from: a2 });
 			await expectRevert(
 				staking.getPriorWeightedStake(a3, result.receipt.blockNumber, kickoffTS),
-				"Staking::getPriorUserStakeAndDate: not yet determined"
+				"StakingTN::getPriorUserStakeAndDate: not yet determined"
 			);
 		});
 	});

@@ -9,7 +9,7 @@ const TestToken = artifacts.require("TestToken");
 const TestWrbtc = artifacts.require("TestWrbtc");
 
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 
 const Protocol = artifacts.require("sovrynProtocol");
 const ProtocolSettings = artifacts.require("ProtocolSettingsMockup");
@@ -56,9 +56,9 @@ contract("FeeSharingProxy:", (accounts) => {
 		susd = await TestToken.new("SUSD", "SUSD", 18, TOTAL_SUPPLY);
 		wrbtc = await TestWrbtc.new();
 
-		//Staking
+		//StakingTN
 		let stakingLogic = await StakingLogic.new(SOVToken.address);
-		staking = await StakingProxy.new(SOVToken.address);
+		staking = await StakingProxyTN.new(SOVToken.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 

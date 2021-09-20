@@ -1,7 +1,7 @@
 const SOV = artifacts.require("TestToken");
 const LockedSOV = artifacts.require("LockedSOV");
-const StakingLogic = artifacts.require("Staking");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingLogic = artifacts.require("StakingTN");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
 const VestingFactory = artifacts.require("VestingFactory");
@@ -33,9 +33,9 @@ contract("Locked SOV (Creator Functions)", (accounts) => {
 		// Creating the instance of SOV Token.
 		sov = await SOV.new("Sovryn", "SOV", 18, zero);
 
-		// Creating the Staking Instance.
+		// Creating the StakingTN Instance.
 		stakingLogic = await StakingLogic.new(sov.address);
-		staking = await StakingProxy.new(sov.address);
+		staking = await StakingProxyTN.new(sov.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
