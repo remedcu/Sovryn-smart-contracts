@@ -21,6 +21,9 @@ def main():
     elif thisNetwork == "rsk-testnet":
         acct = accounts.load("rskdeployer")
         configFile =  open('./scripts/contractInteraction/testnet_contracts.json')
+    elif thisNetwork == "testnet-ws":
+        acct = accounts.load("rskdeployer")
+        configFile =  open('./scripts/contractInteraction/testnet_contracts.json')
     elif thisNetwork == "rsk-mainnet":
         acct = accounts.load("rskdeployer")
         configFile = open(
@@ -38,7 +41,7 @@ def main():
 
     # deploy VestingRegistryLogic
     stakingLogic = acct.deploy(StakingTN)
-    stakingProxy = acct.deploy(StakingProxyTN)
+    stakingProxy = acct.deploy(StakingProxyTN, contracts['SOV'])
     stakingProxy.setImplementation(stakingLogic.address)
     staking = Contract.from_abi(
         "StakingTN",

@@ -27,4 +27,27 @@ def main():
     #load the contracts and acct depending on the network
     conf.loadConfig()
 
+    def stakeTokens(sovAmount, stakeTime, acctAddress, delegateeAddress):
+        SOVtoken = Contract.from_abi("SOV", address=conf.contracts['SOV'], abi=SOV.abi, owner=acctAddress)
+        staking = Contract.from_abi("StakingTN", address=conf.contracts['StakingProxyTN'], abi=StakingTN.abi, owner=acctAddress)
+
+        until = int(time.time()) + int(stakeTime)
+        amount = int(sovAmount) * (10 ** 18)
+
+        SOVtoken.approve(staking.address, amount)
+        tx = staking.stake(amount, until, acctAddress, delegateeAddress)
+
+    def getDetails(acctAddress):
+        staking = Contract.from_abi("StakingTN", address=conf.contracts['StakingProxyTN'], abi=StakingTN.abi, owner=acctAddress)
+        print(staking.kickoffTS())
+        print(staking.getStakes(acctAddress))
+        print(staking.getPriorWeightedStake(acctAddress, len(chain) - 2, time.time()))
+        #tx = staking.withdraw(1000000000000000000000, 1662813908, acctAddress)
+        #tx = staking.withdraw(1000000000000000000000, 1694263508, acctAddress)
+
     #call the functions you want here
+    #stakeTokens("1000", "2246400", "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #stakeTokens(1000, 4492800, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #stakeTokens(1000, 6739200, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #readStakingKickOff()
+    getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
