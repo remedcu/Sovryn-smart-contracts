@@ -23,7 +23,7 @@ contract StakingRewardsStorageTN is Ownable {
 	IStaking public staking;
 
 	/// @notice 2 weeks in seconds.
-	uint256 public constant TWO_WEEKS = 1209600;
+	uint256 public constant TWO_WEEKS = 86400;
 
 	/// @notice Annual Base Rate - it is the maximum interest rate(APY)
 	uint256 public constant BASE_RATE = 2975;
