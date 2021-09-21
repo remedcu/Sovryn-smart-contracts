@@ -27,6 +27,16 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	uint256 constant FOUR_WEEKS = 4 weeks;
 
 	/**
+	 * @notice sets staking rewards
+	 * @dev _stakingRewardsProxy can be set to 0 as this function can be reused by
+	 * various other functionalities without the necessity of linking it with Staking Rewards
+	 * @param _stakingRewardsProxy the address of staking rewards proxy contract
+	 */
+	function setStakingRewards(address _stakingRewardsProxy) external onlyOwner {
+		stakingRewards = StakingRewards(_stakingRewardsProxy);
+	}
+
+	/**
 	 * @notice Stake the given amount for the given duration of time.
 	 * @param amount The number of tokens to stake.
 	 * @param until Timestamp indicating the date until which to stake.
@@ -79,12 +89,12 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		address delegatee,
 		bool timeAdjusted
 	) internal {
-		require(amount > 0, "StakingTN::stake: amount of tokens to stake needs to be bigger than 0");
+		require(amount > 0, "amount needs to be bigger than 0");
 
 		if (!timeAdjusted) {
 			until = timestampToLockDate(until);
 		}
-		require(until > block.timestamp, "StakingTN::timestampToLockDate: staking period too short");
+		require(until > block.timestamp, "staking period too short");
 
 		/// @dev Stake for the sender if not specified otherwise.
 		if (stakeFor == address(0)) {
@@ -120,12 +130,13 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 			_decreaseDelegateStake(previousDelegatee, until, previousBalance);
 
 			/// @dev Add previousBalance to amount.
-			amount = add96(previousBalance, amount, "StakingTN::stake: balance overflow");
+			amount = add96(previousBalance, amount, "balance overflow");
 		}
 
 		/// @dev Increase stake.
 		_increaseDelegateStake(delegatee, until, amount);
 		emit DelegateChanged(stakeFor, until, previousDelegatee, delegatee);
+		_updateRewards();
 	}
 
 	/**
@@ -135,7 +146,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	 * */
 	function extendStakingDuration(uint256 previousLock, uint256 until) public {
 		until = timestampToLockDate(until);
-		require(previousLock <= until, "StakingTN::extendStakingDuration: cannot reduce the staking duration");
+		require(previousLock <= until, "cannot reduce the staking duration");
 
 		/// @dev Do not exceed the max duration, no overflow possible.
 		uint256 latest = timestampToLockDate(block.timestamp + MAX_DURATION);
@@ -144,9 +155,15 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		/// @dev Update checkpoints.
 		/// @dev TODO James: Can reading stake at block.number -1 cause trouble with multiple tx in a block?
 		uint96 amount = _getPriorUserStakeByDate(msg.sender, previousLock, block.number - 1);
-		require(amount > 0, "StakingTN::extendStakingDuration: nothing staked until the previous lock date");
+		require(amount > 0, "nothing staked until the previous lock date");
 		_decreaseUserStake(msg.sender, previousLock, amount);
 		_increaseUserStake(msg.sender, until, amount);
+
+		if (isVestingContract(msg.sender)) {
+			_decreaseVestingStake(previousLock, amount);
+			_increaseVestingStake(until, amount);
+		}
+
 		_decreaseDailyStake(previousLock, amount);
 		_increaseDailyStake(until, amount);
 
@@ -162,6 +179,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		_increaseDelegateStake(delegateTo, until, amount);
 
 		emit ExtendedStakingDuration(msg.sender, previousLock, until, amount);
+		_updateRewards();
 	}
 
 	/**
@@ -183,11 +201,13 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 
 		/// @dev Increase staked balance.
 		uint96 balance = currentBalance(stakeFor, until);
-		balance = add96(balance, amount, "StakingTN::increaseStake: balance overflow");
+		balance = add96(balance, amount, "overflow");
 
 		/// @dev Update checkpoints.
 		_increaseDailyStake(until, amount);
 		_increaseUserStake(stakeFor, until, amount);
+
+		if (isVestingContract(stakeFor)) _increaseVestingStake(until, amount);
 
 		emit TokensStaked(stakeFor, amount, until, balance);
 	}
@@ -305,7 +325,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	) internal {
 		// @dev it's very unlikely some one will have 1/10**18 SOV staked in Vesting contract
 		//		this check is a part of workaround for Vesting.withdrawTokens issue
-		if (amount == 1 && _isVestingContract()) {
+		if (amount == 1 && isVestingContract(msg.sender)) {
 			return;
 		}
 		until = _adjustDateForOrigin(until);
@@ -317,6 +337,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		/// @dev Update the checkpoints.
 		_decreaseDailyStake(until, amount);
 		_decreaseUserStake(msg.sender, until, amount);
+		if (isVestingContract(msg.sender)) _decreaseVestingStake(until, amount);
 		_decreaseDelegateStake(delegates[msg.sender][until], until, amount);
 
 		/// @dev Early unstaking should be punished.
@@ -326,7 +347,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 
 			/// @dev punishedAmount can be 0 if block.timestamp are very close to 'until'
 			if (punishedAmount > 0) {
-				require(address(feeSharing) != address(0), "StakingTN::withdraw: FeeSharing address wasn't set");
+				require(address(feeSharing) != address(0), "FeeSharing address wasn't set");
 				/// @dev Move punished amount to fee sharing.
 				/// @dev Approve transfer here and let feeSharing do transfer and write checkpoint.
 				SOVToken.approve(address(feeSharing), punishedAmount);
@@ -336,9 +357,10 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 
 		/// @dev transferFrom
 		bool success = SOVToken.transfer(receiver, amount);
-		require(success, "StakingTN::withdraw: Token transfer failed");
+		require(success, "Token transfer failed");
 
 		emit StakingWithdrawn(msg.sender, amount, until, receiver, isGovernance);
+		_updateRewards();
 	}
 
 	// @dev withdraws tokens for lock date 2 weeks later than given lock date
@@ -348,14 +370,24 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		address receiver,
 		bool isGovernance
 	) internal {
-		if (_isVestingContract()) {
+		if (isVestingContract(msg.sender)) {
 			uint256 nextLock = until.add(TWO_WEEKS);
 			if (isGovernance || block.timestamp >= nextLock) {
-				uint96 stake = _getPriorUserStakeByDate(msg.sender, nextLock, block.number - 1);
-				if (stake > 0) {
-					_withdraw(stake, nextLock, receiver, isGovernance);
+				uint96 stakes = _getPriorUserStakeByDate(msg.sender, nextLock, block.number - 1);
+				if (stakes > 0) {
+					_withdraw(stakes, nextLock, receiver, isGovernance);
 				}
 			}
+		}
+	}
+
+	/**
+	 * @dev Calls the updateRewards() function to calculate and update rewards of the staker
+	 * when additional staking, withdrawal or extending duration etc.
+	 * */
+	function _updateRewards() internal {
+		if (address(stakingRewards) != address(0) && !isVestingContract(msg.sender)) {
+			stakingRewards.updateRewards(msg.sender);
 		}
 	}
 
@@ -388,9 +420,9 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	 * @param until The date until which the tokens were staked.
 	 * */
 	function _validateWithdrawParams(uint96 amount, uint256 until) internal view {
-		require(amount > 0, "StakingTN::withdraw: amount of tokens to be withdrawn needs to be bigger than 0");
+		require(amount > 0, "amount must be greater than 0");
 		uint96 balance = _getPriorUserStakeByDate(msg.sender, until, block.number - 1);
-		require(amount <= balance, "StakingTN::withdraw: not enough balance");
+		require(amount <= balance, "not enough balance");
 	}
 
 	/**
@@ -411,7 +443,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	 * */
 	function balanceOf(address account) public view returns (uint96 balance) {
 		for (uint256 i = kickoffTS; i <= block.timestamp + MAX_DURATION; i += TWO_WEEKS) {
-			balance = add96(balance, currentBalance(account, i), "StakingTN::balanceOf: overflow");
+			balance = add96(balance, currentBalance(account, i), "balanceOf - overflow");
 		}
 	}
 
@@ -482,9 +514,9 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		address signatory = ecrecover(digest, v, r, s);
 
 		/// @dev Verify address is not null and PK is not null either.
-		require(RSKAddrValidator.checkPKNotZero(signatory), "StakingTN::delegateBySig: invalid signature");
-		require(nonce == nonces[signatory]++, "StakingTN::delegateBySig: invalid nonce");
-		require(now <= expiry, "StakingTN::delegateBySig: signature expired");
+		require(RSKAddrValidator.checkPKNotZero(signatory), "invalid signature");
+		require(nonce == nonces[signatory]++, "invalid nonce");
+		require(now <= expiry, "signature expired");
 		_delegate(signatory, delegatee, lockDate);
 		// @dev delegates tokens for lock date 2 weeks later than given lock date
 		//		if message sender is a contract
@@ -539,7 +571,7 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 		address delegatee,
 		uint256 lockedTS
 	) internal {
-		if (_isVestingContract()) {
+		if (isVestingContract(msg.sender)) {
 			uint256 nextLock = lockedTS.add(TWO_WEEKS);
 			address currentDelegate = delegates[delegator][nextLock];
 			if (currentDelegate != delegatee) {

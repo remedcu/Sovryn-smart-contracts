@@ -2,8 +2,11 @@ const { expect } = require("chai");
 const { expectRevert, expectEvent, constants, BN, balance, time } = require("@openzeppelin/test-helpers");
 const { address, minerStart, minerStop, unlockedAccount, mineBlock, etherMantissa, etherUnsigned, setTime } = require("../Utils/Ethereum");
 
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("Staking");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 const TestToken = artifacts.require("TestToken");
 const Vesting = artifacts.require("TeamVesting");
 
@@ -26,6 +29,16 @@ contract("TeamVesting", (accounts) => {
 		staking = await StakingProxyTN.new(token.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		await staking.setStakingRewards(stakingRewards.address);
+		//Initialize
+		await stakingRewards.initialize(SOV.address, staking.address); //Test - 24/08/2021
+		await stakingRewards.setStakingAddress(staking.address);
 
 		await token.transfer(a2, "1000");
 		await token.approve(staking.address, "1000", { from: a2 });

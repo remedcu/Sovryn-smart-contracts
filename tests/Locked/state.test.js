@@ -1,7 +1,11 @@
 const SOV = artifacts.require("TestToken");
+const TestWrbtc = artifacts.require("TestWrbtc");
 const LockedSOV = artifacts.require("LockedSOV");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
 const VestingFactory = artifacts.require("VestingFactory");
@@ -140,12 +144,23 @@ contract("Locked SOV (State)", (accounts) => {
 
 		// Creating the instance of SOV Token.
 		sov = await SOV.new("Sovryn", "SOV", 18, zero);
+		wrbtc = await TestWrbtc.new();
 
 		// Creating the StakingTN Instance.
 		stakingLogic = await StakingLogic.new(sov.address);
 		staking = await StakingProxyTN.new(sov.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		await staking.setStakingRewards(stakingRewards.address);
+		//Initialize
+		await stakingRewards.initialize(sov.address, staking.address); //Test - 24/08/2021
+		await stakingRewards.setStakingAddress(staking.address);
 
 		// Creating the FeeSharing Instance.
 		feeSharingProxy = await FeeSharingProxy.new(zeroAddress, staking.address);

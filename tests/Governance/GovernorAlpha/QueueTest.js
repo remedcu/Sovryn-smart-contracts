@@ -5,8 +5,8 @@ const { etherMantissa, encodeParameters, mineBlock, increaseTime } = require("..
 
 const GovernorAlpha = artifacts.require("GovernorAlphaMockup");
 const Timelock = artifacts.require("TimelockHarness");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
 const TestToken = artifacts.require("TestToken");
 
 const DELAY = 86400 * 14;
@@ -19,6 +19,7 @@ async function enfranchise(token, staking, actor, amount) {
 	await token.approve(staking.address, amount, { from: actor });
 	let kickoffTS = await staking.kickoffTS.call();
 	let stakingDate = kickoffTS.add(new BN(DELAY));
+
 	await staking.stake(amount, stakingDate, actor, actor, { from: actor });
 
 	await staking.delegate(actor, stakingDate, { from: actor });
@@ -39,6 +40,8 @@ contract("GovernorAlpha#queue/1", (accounts) => {
 			let staking = await StakingProxyTN.new(token.address);
 			await staking.setImplementation(stakingLogic.address);
 			staking = await StakingLogic.at(staking.address);
+			await staking.setVestingRegistry(constants.ZERO_ADDRESS);
+			await staking.setStakingRewards(constants.ZERO_ADDRESS);
 
 			const gov = await GovernorAlpha.new(timelock.address, staking.address, root, 4, 0);
 
@@ -69,6 +72,8 @@ contract("GovernorAlpha#queue/1", (accounts) => {
 			let staking = await StakingProxyTN.new(token.address);
 			await staking.setImplementation(stakingLogic.address);
 			staking = await StakingLogic.at(staking.address);
+			await staking.setVestingRegistry(constants.ZERO_ADDRESS);
+			await staking.setStakingRewards(constants.ZERO_ADDRESS);
 
 			const gov = await GovernorAlpha.new(timelock.address, staking.address, root, 4, 0);
 

@@ -4,9 +4,15 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 const { address, etherMantissa, encodeParameters, mineBlock, setTime } = require("../../Utils/Ethereum");
 
 const GovernorAlpha = artifacts.require("GovernorAlpha");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 const TestToken = artifacts.require("TestToken");
+//Upgradable Vesting Registry
+const VestingRegistryLogic = artifacts.require("VestingRegistryLogic");
+const VestingRegistryProxy = artifacts.require("VestingRegistryProxy");
 
 const QUORUM_VOTES = etherMantissa(4000000);
 const TOTAL_SUPPLY = etherMantissa(1000000000);
@@ -25,7 +31,24 @@ contract("GovernorAlpha#propose/5", (accounts) => {
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		await staking.setStakingRewards(stakingRewards.address);
+		//Initialize
+		await stakingRewards.initialize(token.address, staking.address); //Test - 24/08/2021
+		await stakingRewards.setStakingAddress(staking.address);
+
 		gov = await GovernorAlpha.new(address(0), staking.address, address(0), 4, 0);
+		//Upgradable Vesting Registry
+		vestingRegistryLogic = await VestingRegistryLogic.new();
+		vesting = await VestingRegistryProxy.new();
+		await vesting.setImplementation(vestingRegistryLogic.address);
+		vesting = await VestingRegistryLogic.at(vesting.address);
+
+		await staking.setVestingRegistry(vesting.address);
 	});
 
 	let trivialProposal, targets, values, signatures, callDatas;

@@ -16,6 +16,7 @@ const {
 const StakingLogic = artifacts.require("StakingTN");
 const StakingProxyTN = artifacts.require("StakingProxyTN");
 const SOV = artifacts.require("SOV");
+const TestWrbtc = artifacts.require("TestWrbtc");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogicMockup");
 const Vesting = artifacts.require("TeamVesting");
@@ -41,6 +42,7 @@ contract("Vesting", (accounts) => {
 	before(async () => {
 		[root, a1, a2, a3, ...accounts] = accounts;
 		token = await SOV.new(TOTAL_SUPPLY);
+		wrbtc = await TestWrbtc.new();
 
 		vestingLogic = await VestingLogic.new();
 
@@ -50,6 +52,8 @@ contract("Vesting", (accounts) => {
 		staking = await StakingProxyTN.new(token.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+		await staking.setVestingRegistry(constants.ZERO_ADDRESS);
+		await staking.setStakingRewards(constants.ZERO_ADDRESS);
 
 		await token.transfer(a2, "1000");
 		await token.approve(staking.address, "1000", { from: a2 });
@@ -542,6 +546,7 @@ contract("Vesting", (accounts) => {
 			//time travel
 			await increaseTime(3 * WEEK);
 
+			await staking.addContractCodeHash(vesting.address);
 			//withdraw
 			let tx = await vesting.withdrawTokens(root);
 
@@ -628,7 +633,6 @@ contract("Vesting", (accounts) => {
 			//time travel
 			await increaseTime(104 * WEEK);
 
-			await staking.addContractCodeHash(vesting.address);
 			//withdraw
 			let tx = await vesting.withdrawTokens(root);
 

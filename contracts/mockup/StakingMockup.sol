@@ -55,9 +55,4 @@ contract StakingMockup is StakingTN {
 	function getCodeHash(address _contract) public view returns (bytes32) {
 		return _getCodeHash(_contract);
 	}
-
-	function isVestingContract(address _contract) public view returns (bool) {
-		bytes32 codeHash = _getCodeHash(_contract);
-		return vestingCodeHashes[codeHash];
-	}
 }

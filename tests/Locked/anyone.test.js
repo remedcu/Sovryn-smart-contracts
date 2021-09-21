@@ -1,7 +1,8 @@
 const SOV = artifacts.require("TestToken");
+const TestWrbtc = artifacts.require("TestWrbtc");
 const LockedSOV = artifacts.require("LockedSOV");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
 const VestingFactory = artifacts.require("VestingFactory");
@@ -42,12 +43,15 @@ contract("Locked SOV (Any User Functions)", (accounts) => {
 
 		// Creating the instance of SOV Token.
 		sov = await SOV.new("Sovryn", "SOV", 18, zero);
+		wrbtc = await TestWrbtc.new();
 
 		// Creating the StakingTN Instance.
 		stakingLogic = await StakingLogic.new(sov.address);
 		staking = await StakingProxyTN.new(sov.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+		await staking.setVestingRegistry(constants.ZERO_ADDRESS);
+		await staking.setStakingRewards(constants.ZERO_ADDRESS);
 
 		// Creating the FeeSharing Instance.
 		feeSharingProxy = await FeeSharingProxy.new(zeroAddress, staking.address);
@@ -141,10 +145,7 @@ contract("Locked SOV (Any User Functions)", (accounts) => {
 	});
 
 	it("No one can use createVestingAndStake() if he does not have any locked sov balance.", async () => {
-		await expectRevert(
-			newLockedSOV.createVestingAndStake({ from: userOne }),
-			"StakingTN::stake: amount of tokens to stake needs to be bigger than 0"
-		);
+		await expectRevert(newLockedSOV.createVestingAndStake({ from: userOne }), "amount needs to be bigger than 0");
 	});
 
 	it("Anyone can create a vesting schedule using createVesting() even with no locked sov balance.", async () => {

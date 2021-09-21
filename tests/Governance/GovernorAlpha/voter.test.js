@@ -2,8 +2,11 @@
 const GovernorAlpha = artifacts.require("GovernorAlphaMockup");
 const Timelock = artifacts.require("Timelock");
 const TestToken = artifacts.require("TestToken");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 
 const {
 	time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -79,6 +82,17 @@ contract("GovernorAlpha (Voter Functions)", (accounts) => {
 		stakingProxy = await StakingProxyTN.new(testToken.address);
 		await stakingProxy.setImplementation(stakingLogic.address);
 		stakingLogic = await StakingLogic.at(stakingProxy.address);
+		await stakingLogic.setVestingRegistry(constants.ZERO_ADDRESS);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address); //Test - 12/08/2021
+		await stakingLogic.setStakingRewards(constants.ZERO_ADDRESS);
+		//Initialize
+		await stakingRewards.initialize(testToken.address, stakingLogic.address);
+		await stakingRewards.setStakingAddress(stakingLogic.address);
 
 		// Creating the Timelock Contract instance.
 		// We would be assigning the `guardianOne` as the admin for now.

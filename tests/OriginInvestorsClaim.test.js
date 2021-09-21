@@ -4,10 +4,11 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 
 const { mineBlock, setNextBlockTimestamp } = require("./Utils/Ethereum");
 
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
 const SOV_ABI = artifacts.require("SOV");
 const TestToken = artifacts.require("TestToken");
+const TestWrbtc = artifacts.require("TestWrbtc");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
 const VestingFactory = artifacts.require("VestingFactory");
@@ -98,6 +99,7 @@ contract("OriginInvestorsClaim", (accounts) => {
 		amount3 = amount1.muln(5);
 		amounts = [amount1, amount2, amount3];
 
+		wrbtc = await TestWrbtc.new();
 		SOV = await SOV_ABI.new(TOTAL_SUPPLY);
 		cSOV1 = await TestToken.new("cSOV1", "cSOV1", 18, TOTAL_SUPPLY);
 		cSOV2 = await TestToken.new("cSOV2", "cSOV2", 18, TOTAL_SUPPLY);
@@ -106,6 +108,8 @@ contract("OriginInvestorsClaim", (accounts) => {
 		staking = await StakingProxyTN.new(SOV.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+		await staking.setVestingRegistry(constants.ZERO_ADDRESS);
+		await staking.setStakingRewards(constants.ZERO_ADDRESS);
 
 		feeSharingProxy = await FeeSharingProxy.new(ZERO_ADDRESS, staking.address);
 

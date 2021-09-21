@@ -18,8 +18,14 @@ const { getAccountsPrivateKeys, getAccountsPrivateKeysBuffer } = require("../../
 const { bufferToHex, privateToAddress, toChecksumAddress } = require("ethereumjs-util");
 
 const GovernorAlpha = artifacts.require("GovernorAlphaMockup");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Upgradable Vesting Registry
+const VestingRegistryLogic = artifacts.require("VestingRegistryLogic");
+const VestingRegistryProxy = artifacts.require("VestingRegistryProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 const TestToken = artifacts.require("TestToken");
 
 const DELAY = 86400 * 14;
@@ -54,6 +60,24 @@ contract("governorAlpha#castVote/2", (accounts) => {
 		staking = await StakingProxyTN.new(token.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+
+		//Upgradable Vesting Registry
+		vestingRegistryLogic = await VestingRegistryLogic.new();
+		vesting = await VestingRegistryProxy.new();
+		await vesting.setImplementation(vestingRegistryLogic.address);
+		vesting = await VestingRegistryLogic.at(vesting.address);
+
+		await staking.setVestingRegistry(vesting.address);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		await staking.setStakingRewards(stakingRewards.address);
+		//Initialize
+		await stakingRewards.initialize(token.address, staking.address); //Test - 24/08/2021
+		await stakingRewards.setStakingAddress(staking.address);
 
 		gov = await GovernorAlpha.new(address(0), staking.address, root, 4, 0);
 

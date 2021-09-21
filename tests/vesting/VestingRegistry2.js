@@ -3,9 +3,13 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 
 const { encodeParameters, etherMantissa, mineBlock, increaseTime, blockNumber } = require("../Utils/Ethereum");
 
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
 const SOV_ABI = artifacts.require("SOV");
+const TestWrbtc = artifacts.require("TestWrbtc");
 const TestToken = artifacts.require("TestToken");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
@@ -37,6 +41,7 @@ contract("VestingRegistry", (accounts) => {
 	});
 
 	beforeEach(async () => {
+		wrbtc = await TestWrbtc.new();
 		SOV = await SOV_ABI.new(TOTAL_SUPPLY);
 		cSOV1 = await TestToken.new("cSOV1", "cSOV1", 18, TOTAL_SUPPLY);
 		cSOV2 = await TestToken.new("cSOV2", "cSOV2", 18, TOTAL_SUPPLY);
@@ -45,6 +50,16 @@ contract("VestingRegistry", (accounts) => {
 		staking = await StakingProxyTN.new(SOV.address);
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		await staking.setStakingRewards(stakingRewards.address);
+		//Initialize
+		await stakingRewards.initialize(SOV.address, staking.address); //Test - 24/08/2021
+		await stakingRewards.setStakingAddress(staking.address);
 
 		feeSharingProxy = await FeeSharingProxy.new(ZERO_ADDRESS, staking.address);
 

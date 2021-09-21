@@ -2,8 +2,15 @@
 const GovernorAlpha = artifacts.require("GovernorAlphaMockup");
 const Timelock = artifacts.require("Timelock");
 const TestToken = artifacts.require("TestToken");
-const StakingLogic = artifacts.require("StakingTN");
-const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingLogic = artifacts.require("StakingMockup");
+const StakingProxy = artifacts.require("StakingProxy");
+//Staking Rewards
+const StakingRewards = artifacts.require("StakingRewards");
+const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+//Upgradable Vesting Registry
+const VestingRegistryLogic = artifacts.require("VestingRegistryLogic");
+const VestingRegistryProxy = artifacts.require("VestingRegistryProxy");
+
 const SetGet = artifacts.require("setGet");
 const { ethers } = require("hardhat");
 
@@ -93,6 +100,24 @@ contract("GovernorAlpha (Any User Functions)", (accounts) => {
 		stakingProxy = await StakingProxyTN.new(testToken.address);
 		await stakingProxy.setImplementation(stakingLogic.address);
 		stakingLogic = await StakingLogic.at(stakingProxy.address);
+
+		//Upgradable Vesting Registry
+		vestingRegistryLogic = await VestingRegistryLogic.new();
+		vesting = await VestingRegistryProxy.new();
+		await vesting.setImplementation(vestingRegistryLogic.address);
+		vesting = await VestingRegistryLogic.at(vesting.address);
+
+		await stakingLogic.setVestingRegistry(vesting.address);
+
+		//Staking Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewards.new();
+		stakingRewards = await StakingRewardsProxy.new();
+		await stakingRewards.setImplementation(stakingRewardsLogic.address);
+		stakingRewards = await StakingRewards.at(stakingRewards.address); //Test - 12/08/2021
+		await stakingLogic.setStakingRewards(constants.ZERO_ADDRESS);
+		//Initialize
+		await stakingRewards.initialize(testToken.address, stakingLogic.address);
+		await stakingRewards.setStakingAddress(stakingLogic.address);
 
 		// Creating the Timelock Contract instance.
 		// We would be assigning the `guardianOne` as the admin for now.
