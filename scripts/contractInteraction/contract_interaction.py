@@ -45,9 +45,14 @@ def main():
         #tx = staking.withdraw(1000000000000000000000, 1662813908, acctAddress)
         #tx = staking.withdraw(1000000000000000000000, 1694263508, acctAddress)
 
+    def getRewards(acctAddress):
+        stakingRewards = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingrewardsProxyTN'], abi=StakingRewardsTN.abi, owner=acctAddress)
+        print(stakingRewards.getStakerCurrentReward(True, {'from': acctAddress}))
+
     #call the functions you want here
     #stakeTokens("1000", "2246400", "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #stakeTokens(1000, 4492800, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #stakeTokens(1000, 6739200, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #readStakingKickOff()
-    getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")

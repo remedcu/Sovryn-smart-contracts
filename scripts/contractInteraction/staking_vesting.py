@@ -102,11 +102,10 @@ def upgradeStaking():
     
     # Get the proxy contract instance
     #stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingTN'], abi=StakingProxyTN.abi, owner=conf.acct)
-    stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingTN'], abi=StakingProxyTN.abi, owner=conf.acct)
+    stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingProxyTN'], abi=StakingProxyTN.abi, owner=conf.acct)
 
     # Register logic in Proxy
     data = stakingProxy.setImplementation.encode_input(stakingLogic.address)
-    sendWithMultisig(conf.contracts['multisig'], conf.contracts['StakingTN'], data, conf.acct)
 
 #StakingRewardsTN
 
@@ -123,7 +122,10 @@ def upgradeStakingRewards():
 
     # Register logic in Proxy
     data = stakingRewardsProxy.setImplementation.encode_input(stakingRewards.address)
-    sendWithMultisig(conf.contracts['multisig'], conf.contracts['StakingRewardsProxyTN'], data, conf.acct)
+
+      # Get the logic contract instance
+    stakingRewardsLogic = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=conf.acct)
+    stakingRewardsLogic.setStakingAddress(conf.contracts[StakingRewardsProxyTN])
 
 #Upgrade Vesting Registry
 
@@ -142,17 +144,30 @@ def upgradeVesting():
     data = vestingRegistryProxy.setImplementation.encode_input(vestingRegistryLogic.address)
     sendWithMultisig(conf.contracts['multisig'], conf.contracts['VestingRegistryLogic'], data, conf.acct)
 
-#Set Vesting Registry Address for StakingTN
+#Set VestingRegistry, StakingRewards & FeeSharing addresses for StakingTN
 
-def updateVestingRegAddr():
-
-    # Get the proxy contract instance
-    stakingProxy = Contract.from_abi("StakingTN", address=conf.contracts['StakingTN'], abi=StakingTN.abi, owner=conf.acct)
+def updateAddresses():
 
     # Get the proxy contract instance
-    vestingRegistryProxy = Contract.from_abi("VestingRegistryProxy", address=conf.contracts['VestingRegistryLogic'], abi=VestingRegistryProxy.abi, owner=conf.acct)
+    stakingProxy = Contract.from_abi("StakingTN", address=conf.contracts['StakingProxyTN'], abi=StakingTN.abi, owner=conf.acct)
+
+    # Get the vesting proxy contract instance
+    vestingRegistryProxy = conf.contracts[VestingRegistryProxy]
+
+    # Get the staking rewards proxy contract instance
+    stakingRewardsProxy = conf.contracts[StakingRewardsProxyTN]
+
+    # Get the fee sharing proxy contract instance
+    feeSharingProxy = conf.contracts[FeeSharingProxy]
 
     #Send with Multisig
-    data = stakingProxy.setVestingRegistry.encode_input(vestingRegistryProxy)
+    data = stakingProxy.setVestingRegistry(vestingRegistryProxy)
     print(data)
-    sendWithMultisig(conf.contracts['multisig'], stakingProxy.address, data, conf.acct)
+
+    #Send with Multisig
+    data = stakingProxy.setStakingRewards(stakingRewardsProxy)
+    print(data)
+
+    #Send with Multisig
+    data = stakingProxy.setFeeSharing(feeSharingProxy)
+    print(data)
