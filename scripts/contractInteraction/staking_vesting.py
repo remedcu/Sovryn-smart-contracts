@@ -142,7 +142,7 @@ def upgradeVesting():
     data = vestingRegistryProxy.setImplementation.encode_input(vestingRegistryLogic.address)
     sendWithMultisig(conf.contracts['multisig'], conf.contracts['VestingRegistryLogic'], data, conf.acct)
 
-#Set Vesting Registry Address for Staking
+#Set Vesting Registry Address for StakingTN
 
 def updateVestingRegAddr():
 

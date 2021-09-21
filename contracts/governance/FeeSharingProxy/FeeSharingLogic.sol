@@ -10,7 +10,7 @@ import "./FeeSharingProxyStorage.sol";
 
 /**
  * @title The FeeSharingLogic contract.
- * @notice Staking is not only granting voting rights, but also access to fee
+ * @notice StakingTN is not only granting voting rights, but also access to fee
  * sharing according to the own voting power in relation to the total. Whenever
  * somebody decides to collect the fees from the protocol, they get transferred
  * to a proxy contract which invests the funds in the lending pool and keeps

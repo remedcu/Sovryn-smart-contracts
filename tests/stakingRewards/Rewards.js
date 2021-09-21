@@ -5,9 +5,9 @@ const { increaseTime, blockNumber } = require("../Utils/Ethereum");
 
 const SOV_ABI = artifacts.require("SOV");
 const StakingLogic = artifacts.require("StakingMockOld");
-const StakingProxy = artifacts.require("StakingProxy");
-const StakingRewards = artifacts.require("StakingRewardsMockUpOld");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingRewardsTN = artifacts.require("StakingRewardsMockUpOld");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 //Upgradable Vesting Registry
 const VestingRegistryLogic = artifacts.require("VestingRegistryLogic");
 const VestingRegistryProxy = artifacts.require("VestingRegistryProxy");
@@ -89,7 +89,7 @@ contract("StakingRewardsTN - First Period", (accounts) => {
 			await expectRevert(stakingRewards.initialize(constants.ZERO_ADDRESS, staking.address), "Invalid SOV Address.");
 			//Initialize
 			await stakingRewards.initialize(SOV.address, staking.address); //Test - 24/08/2021
-			//Staking Rewards Contract is loaded
+			//StakingTN Rewards Contract is loaded
 			await SOV.transfer(stakingRewards.address, wei("1000000", "ether"));
 			await increaseTimeAndBlocks(100800);
 			await staking.stake(wei("1000", "ether"), inOneYear, a1, a1, { from: a1 }); //StakingTN after program is initialised

@@ -5,7 +5,7 @@ const { expectRevert, expectEvent, constants, BN, balance, time } = require("@op
 const { mineBlock, setNextBlockTimestamp } = require("./Utils/Ethereum");
 
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
 const SOV_ABI = artifacts.require("SOV");
 const TestToken = artifacts.require("TestToken");
 const TestWrbtc = artifacts.require("TestWrbtc");

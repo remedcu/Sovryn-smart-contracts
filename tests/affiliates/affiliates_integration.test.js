@@ -5,11 +5,11 @@ const LoanTokenLogicLM = artifacts.require("LoanTokenLogicLM");
 const sovrynProtocol = artifacts.require("sovrynProtocol");
 const LoanToken = artifacts.require("LoanToken");
 const LockedSOV = artifacts.require("LockedSOV");
-const StakingLogic = artifacts.require("Staking");
-const StakingProxy = artifacts.require("StakingProxy");
-//Staking Rewards
-const StakingRewards = artifacts.require("StakingRewards");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingLogic = artifacts.require("StakingTN");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+//StakingTN Rewards
+const StakingRewardsTN = artifacts.require("StakingRewardsTN");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 const FeeSharingProxy = artifacts.require("FeeSharingProxyMockup");
 const VestingLogic = artifacts.require("VestingLogic");
 const VestingFactory = artifacts.require("VestingFactory");
@@ -100,11 +100,11 @@ contract("Affiliates", (accounts) => {
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
-		//Staking Reward Program is deployed
-		let stakingRewardsLogic = await StakingRewards.new();
-		stakingRewards = await StakingRewardsProxy.new();
+		//StakingTN Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewardsTN.new();
+		stakingRewards = await StakingRewardsProxyTN.new();
 		await stakingRewards.setImplementation(stakingRewardsLogic.address);
-		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		stakingRewards = await StakingRewardsTN.at(stakingRewards.address);
 		await staking.setStakingRewards(stakingRewards.address);
 		//Initialize
 		await stakingRewards.initialize(tokenSOV.address, staking.address); //Test - 24/08/2021

@@ -2,10 +2,10 @@ const GovernorAlpha = artifacts.require("GovernorAlpha");
 const Timelock = artifacts.require("Timelock");
 const TestToken = artifacts.require("TestToken");
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
-//Staking Rewards
-const StakingRewards = artifacts.require("StakingRewards");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+//StakingTN Rewards
+const StakingRewardsTN = artifacts.require("StakingRewardsTN");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 
 const {
 	time, // Convert different time units to seconds. Available helpers are: seconds, minutes, hours, days, weeks and years.
@@ -62,11 +62,11 @@ contract("GovernorAlpha (Proposer Functions)", (accounts) => {
 		stakingLogic = await StakingLogic.at(stakingProxy.address);
 		await stakingLogic.setVestingRegistry(constants.ZERO_ADDRESS);
 
-		//Staking Reward Program is deployed
-		let stakingRewardsLogic = await StakingRewards.new();
-		stakingRewards = await StakingRewardsProxy.new();
+		//StakingTN Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewardsTN.new();
+		stakingRewards = await StakingRewardsProxyTN.new();
 		await stakingRewards.setImplementation(stakingRewardsLogic.address);
-		stakingRewards = await StakingRewards.at(stakingRewards.address); //Test - 12/08/2021
+		stakingRewards = await StakingRewardsTN.at(stakingRewards.address); //Test - 12/08/2021
 		await stakingLogic.setStakingRewards(constants.ZERO_ADDRESS);
 		//Initialize
 		await stakingRewards.initialize(testToken.address, stakingLogic.address);

@@ -29,11 +29,11 @@ contract StakingTN is IStaking, WeightedStaking, ApprovalReceiver {
 	/**
 	 * @notice sets staking rewards
 	 * @dev _stakingRewardsProxy can be set to 0 as this function can be reused by
-	 * various other functionalities without the necessity of linking it with Staking Rewards
+	 * various other functionalities without the necessity of linking it with StakingTN Rewards
 	 * @param _stakingRewardsProxy the address of staking rewards proxy contract
 	 */
 	function setStakingRewards(address _stakingRewardsProxy) external onlyOwner {
-		stakingRewards = StakingRewards(_stakingRewardsProxy);
+		stakingRewards = StakingRewardsTN(_stakingRewardsProxy);
 	}
 
 	/**

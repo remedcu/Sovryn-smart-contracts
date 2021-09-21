@@ -250,11 +250,11 @@ def createProposalSIP0025():
     # TODO FeeSharingProxy2 should be deployed
     # TODO remove setFeesController action if multig is still an owner of the protocol
 
-    staking = Contract.from_abi("StakingProxy", address=contracts['Staking'], abi=StakingProxy.abi, owner=acct)
+    staking = Contract.from_abi("StakingProxyTN", address=contracts['StakingTN'], abi=StakingProxyTN.abi, owner=acct)
     protocol = Contract.from_abi("ProtocolSettings", address=contracts['sovrynProtocol'], abi=ProtocolSettings.abi, owner=acct)
 
     # Action
-    targets = [contracts['Staking'], contracts['sovrynProtocol']]
+    targets = [contracts['StakingTN'], contracts['sovrynProtocol']]
     values = [0, 0]
     signatures = ["setImplementation(address)", "setFeesController(address)"]
     data1 = staking.setImplementation.encode_input(contracts['StakingLogic4'])

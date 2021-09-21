@@ -1,13 +1,13 @@
 pragma solidity ^0.5.17;
 
-import "../governance/StakingRewards/StakingRewardsStorage.sol";
+import "../governance/StakingRewardsTN/StakingRewardsStorageTN.sol";
 import "../openzeppelin/Initializable.sol";
 import "../openzeppelin/SafeMath.sol";
 import "../openzeppelin/Address.sol";
 import "./BlockMockUp.sol";
 
 /**
- * @title Staking Rewards Contract.
+ * @title StakingTN Rewards Contract.
  * @notice This is a trial incentive program.
  * In this, the SOV emitted and becoming liquid from the Adoption Fund could be utilized
  * to offset the higher APY's offered for Liquidity Mining events.
@@ -18,7 +18,7 @@ import "./BlockMockUp.sol";
  * plus revenues from stakers who have a portion of their SOV slashed for
  * early unstaking.
  * */
-contract StakingRewardsMockUpOld is StakingRewardsStorage, Initializable {
+contract StakingRewardsMockUpOld is StakingRewardsStorageTN, Initializable {
 	///@notice the block mock up contract
 	BlockMockUp public blockMockUp;
 	using SafeMath for uint256;
@@ -32,7 +32,7 @@ contract StakingRewardsMockUpOld is StakingRewardsStorage, Initializable {
 	 * @notice Replacement of constructor by initialize function for Upgradable Contracts
 	 * This function will be called only once by the owner.
 	 * @param _SOV SOV token address
-	 * @param _staking StakingProxy address should be passed
+	 * @param _staking StakingProxyTN address should be passed
 	 * */
 	function initialize(address _SOV, IStaking _staking) external onlyOwner initializer {
 		require(_SOV != address(0), "Invalid SOV Address.");

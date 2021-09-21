@@ -6,10 +6,10 @@ const { increaseTime, blockNumber } = require("../Utils/Ethereum");
 const SOV_ABI = artifacts.require("SOV");
 const StakingLogic = artifacts.require("StakingMockOld");
 const StakingLogicNew = artifacts.require("StakingMock");
-const StakingProxy = artifacts.require("StakingProxy");
-const StakingRewards = artifacts.require("StakingRewardsMockUpOld");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+const StakingRewardsTN = artifacts.require("StakingRewardsMockUpOld");
 const StakingRewardsNew = artifacts.require("StakingRewardsMockUp");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 const FeeSharingLogic = artifacts.require("FeeSharingLogic");
 const FeeSharingProxy = artifacts.require("FeeSharingProxy");
 const Protocol = artifacts.require("sovrynProtocol");
@@ -24,7 +24,7 @@ const TOTAL_SUPPLY = "10000000000000000000000000";
 const TWO_WEEKS = 1209600;
 const DELAY = TWO_WEEKS;
 
-contract("StakingRewards - Upgrade", (accounts) => {
+contract("StakingRewardsTN - Upgrade", (accounts) => {
 	let root, a1, a2, a3;
 	let SOV, staking;
 	let kickoffTS, inOneYear, inTwoYears, inThreeYears;
@@ -39,9 +39,9 @@ contract("StakingRewards - Upgrade", (accounts) => {
 		//BlockMockUp
 		blockMockUp = await BlockMockUp.new();
 
-		//Deployed Staking Functionality
+		//Deployed StakingTN Functionality
 		let stakingLogic = await StakingLogic.new(SOV.address);
-		stakingObj = await StakingProxy.new(SOV.address);
+		stakingObj = await StakingProxyTN.new(SOV.address);
 		await stakingObj.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(stakingObj.address);
 
@@ -76,24 +76,24 @@ contract("StakingRewards - Upgrade", (accounts) => {
 		await increaseTime(291242);
 		await staking.stake(wei("10000", "ether"), inThreeYears, a3, a3, { from: a3 });
 
-		//Staking Reward Program is deployed
-		let stakingRewardsLogic = await StakingRewards.new();
-		stakingRewardsObj = await StakingRewardsProxy.new();
+		//StakingTN Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewardsTN.new();
+		stakingRewardsObj = await StakingRewardsProxyTN.new();
 		await stakingRewardsObj.setImplementation(stakingRewardsLogic.address);
-		stakingRewards = await StakingRewards.at(stakingRewardsObj.address);
+		stakingRewards = await StakingRewardsTN.at(stakingRewardsObj.address);
 		await stakingRewards.setBlockMockUpAddr(blockMockUp.address);
 		await staking.setBlockMockUpAddr(blockMockUp.address);
 	});
 
-	describe("Flow - StakingRewards", () => {
+	describe("Flow - StakingRewardsTN", () => {
 		it("should revert if SOV Address is invalid", async () => {
 			await expectRevert(stakingRewards.initialize(constants.ZERO_ADDRESS, staking.address), "Invalid SOV Address.");
-			//Staking Rewards Contract is loaded
+			//StakingTN Rewards Contract is loaded
 			await SOV.transfer(stakingRewards.address, wei("1000000", "ether"));
 			//Initialize
 			await stakingRewards.initialize(SOV.address, staking.address); //Test - 24/08/2021
 			await increaseTimeAndBlocks(100800);
-			await staking.stake(wei("1000", "ether"), inOneYear, a1, a1, { from: a1 }); //Staking after program is initialised
+			await staking.stake(wei("1000", "ether"), inOneYear, a1, a1, { from: a1 }); //StakingTN after program is initialised
 			await increaseTimeAndBlocks(100800);
 			await staking.stake(wei("50000", "ether"), inTwoYears, a2, a2, { from: a2 });
 		});

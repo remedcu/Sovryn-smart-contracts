@@ -5,7 +5,7 @@ import "../../openzeppelin/Ownable.sol";
 import "../../interfaces/IERC20.sol";
 import "../IFeeSharingProxy.sol";
 import "../Vesting/VestingRegistryLogic.sol";
-import "../StakingRewards/StakingRewards.sol";
+import "../StakingRewardsTN/StakingRewardsTN.sol";
 
 /**
  * @title StakingTN Storage contact.
@@ -139,5 +139,5 @@ contract StakingStorageTN is Ownable {
 	VestingRegistryLogic public vestingRegistryLogic;
 
 	///@notice the staking rewards contract
-	StakingRewards public stakingRewards;
+	StakingRewardsTN public stakingRewards;
 }

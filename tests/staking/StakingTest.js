@@ -8,10 +8,10 @@ const EIP712 = require("../Utils/EIP712");
 const { getAccountsPrivateKeysBuffer } = require("../Utils/hardhat_utils");
 
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
-//Staking Rewards
-const StakingRewards = artifacts.require("StakingRewards");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+//StakingTN Rewards
+const StakingRewardsTN = artifacts.require("StakingRewardsTN");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 const TestToken = artifacts.require("TestToken");
 const VestingLogic = artifacts.require("VestingLogic");
 //Upgradable Vesting Registry
@@ -60,11 +60,11 @@ contract("StakingTN", (accounts) => {
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingLogic.at(staking.address);
 
-		//Staking Reward Program is deployed
-		let stakingRewardsLogic = await StakingRewards.new();
-		stakingRewards = await StakingRewardsProxy.new();
+		//StakingTN Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewardsTN.new();
+		stakingRewards = await StakingRewardsProxyTN.new();
 		await stakingRewards.setImplementation(stakingRewardsLogic.address);
-		stakingRewards = await StakingRewards.at(stakingRewards.address);
+		stakingRewards = await StakingRewardsTN.at(stakingRewards.address);
 		await staking.setStakingRewards(stakingRewards.address);
 		//Initialize
 		await stakingRewards.initialize(token.address, staking.address); //Test - 24/08/2021
@@ -116,7 +116,7 @@ contract("StakingTN", (accounts) => {
 	// 			expiry = 0;
 	// 		await expectRevert(
 	// 			staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, 0, "0xbad", "0xbad"),
-	// 			"Staking::delegateBySig: invalid signature"
+	// 			"StakingTN::delegateBySig: invalid signature"
 	// 		);
 	// 	});
 	//
@@ -154,7 +154,7 @@ contract("StakingTN", (accounts) => {
 	//
 	// 		await expectRevert(
 	// 			staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, v, r, s),
-	// 			"Staking::delegateBySig: invalid nonce"
+	// 			"StakingTN::delegateBySig: invalid nonce"
 	// 		);
 	// 	});
 	//
@@ -177,7 +177,7 @@ contract("StakingTN", (accounts) => {
 	// 		);
 	// 		await expectRevert(
 	// 			staking.delegateBySig(delegatee, inThreeYears, nonce, expiry, v, r, s),
-	// 			"Staking::delegateBySig: signature expired"
+	// 			"StakingTN::delegateBySig: signature expired"
 	// 		);
 	// 	});
 	//

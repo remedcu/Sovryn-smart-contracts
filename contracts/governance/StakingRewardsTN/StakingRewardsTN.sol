@@ -41,7 +41,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 	}
 
 	/**
-	 * @notice Set Staking Address
+	 * @notice Set StakingTN Address
 	 * @param _stakingAddr The staking contract address.
 	 * */
 	function setStakingAddress(address _stakingAddr) external onlyOwner {
@@ -91,7 +91,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 
 	/**
 	 * @notice Update rewards
-	 * @dev This function is called from Staking to update SOV staking rewards as per the SIP-0024 program.
+	 * @dev This function is called from StakingTN to update SOV staking rewards as per the SIP-0024 program.
 	 * The idea is to calculate and save rewards whenever the user performs any staking activity
 	 * */
 	function updateRewards(address receiver) external {

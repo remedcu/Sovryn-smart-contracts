@@ -16,10 +16,10 @@ const {
 } = require("../Utils/Ethereum");
 
 const StakingLogic = artifacts.require("StakingMockup");
-const StakingProxy = artifacts.require("StakingProxy");
-//Staking Rewards
-const StakingRewards = artifacts.require("StakingRewards");
-const StakingRewardsProxy = artifacts.require("StakingRewardsProxy");
+const StakingProxyTN = artifacts.require("StakingProxyTN");
+//StakingTN Rewards
+const StakingRewardsTN = artifacts.require("StakingRewardsTN");
+const StakingRewardsProxyTN = artifacts.require("StakingRewardsProxyTN");
 const StakingMockup = artifacts.require("StakingMockup");
 const VestingLogic = artifacts.require("VestingLogicMockup");
 const Vesting = artifacts.require("TeamVesting");
@@ -83,11 +83,11 @@ contract("StakingTN", (accounts) => {
 		await staking.setImplementation(stakingLogic.address);
 		staking = await StakingMockup.at(staking.address);
 
-		//Staking Reward Program is deployed
-		let stakingRewardsLogic = await StakingRewards.new();
-		stakingRewards = await StakingRewardsProxy.new();
+		//StakingTN Reward Program is deployed
+		let stakingRewardsLogic = await StakingRewardsTN.new();
+		stakingRewards = await StakingRewardsProxyTN.new();
 		await stakingRewards.setImplementation(stakingRewardsLogic.address);
-		stakingRewards = await StakingRewards.at(stakingRewards.address); //Test - 12/08/2021
+		stakingRewards = await StakingRewardsTN.at(stakingRewards.address); //Test - 12/08/2021
 		await staking.setStakingRewards(constants.ZERO_ADDRESS);
 		//Initialize
 		await stakingRewards.initialize(token.address, staking.address);
@@ -150,7 +150,7 @@ contract("StakingTN", (accounts) => {
 			await expectRevert(staking.stake(100, inOneWeek, root, root, { from: account1 }), "ERC20: transfer amount exceeds allowance");
 		});
 
-		it("Staking period too short", async () => {
+		it("StakingTN period too short", async () => {
 			await expectRevert(staking.stake(100, await getTimeFromKickoff(DAY), root, root), "staking period too short");
 		});
 
@@ -1008,11 +1008,11 @@ contract("StakingTN", (accounts) => {
 			await staking.setImplementation(stakingLogic.address);
 			staking = await StakingLogic.at(staking.address);
 
-			//Staking Reward Program is deployed
-			let stakingRewardsLogic = await StakingRewards.new();
-			stakingRewards = await StakingRewardsProxy.new();
+			//StakingTN Reward Program is deployed
+			let stakingRewardsLogic = await StakingRewardsTN.new();
+			stakingRewards = await StakingRewardsProxyTN.new();
 			await stakingRewards.setImplementation(stakingRewardsLogic.address);
-			stakingRewards = await StakingRewards.at(stakingRewards.address);
+			stakingRewards = await StakingRewardsTN.at(stakingRewards.address);
 			await staking.setStakingRewards(stakingRewards.address);
 			//Initialize
 			await stakingRewards.initialize(token.address, staking.address); //Test - 24/08/2021
