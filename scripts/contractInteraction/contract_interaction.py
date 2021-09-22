@@ -46,8 +46,19 @@ def main():
         #tx = staking.withdraw(1000000000000000000000, 1694263508, acctAddress)
 
     def getRewards(acctAddress):
-        stakingRewards = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingrewardsProxyTN'], abi=StakingRewardsTN.abi, owner=acctAddress)
-        print(stakingRewards.getStakerCurrentReward(True, {'from': acctAddress}))
+        stakingRewards = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=acctAddress)
+        print(stakingRewards.getClaimableReward(True, {'from': acctAddress}))
+
+    def getImplementation():        
+        # Get the proxy contract instance
+        stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingProxyTN'], abi=StakingProxyTN.abi, owner=conf.acct)
+
+        # Register logic in Proxy
+        data = stakingProxy.getImplementation()
+        print(data)
+
+        #data = stakingProxy.getOwner()
+        #print(data)
 
     #call the functions you want here
     #stakeTokens("1000", "2246400", "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
@@ -56,3 +67,11 @@ def main():
     #readStakingKickOff()
     #getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #getImplementation()
+
+    #Bundle Deployment
+    #upgradeStaking()
+    #deployFeeSharingProxy()
+    #deployConversionFeeSharingToWRBTC()
+    #upgradeStakingRewards()
+    #updateAddresses()

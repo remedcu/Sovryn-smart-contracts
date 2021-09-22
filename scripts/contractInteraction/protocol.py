@@ -340,17 +340,12 @@ def deployConversionFeeSharingToWRBTC():
 
     print("Set implementation for FeeSharingProxy")
     feeSharingProxy = Contract.from_abi("FeeSharingProxy", address=conf.contracts['FeeSharingProxy'], abi=FeeSharingProxy.abi, owner=conf.acct)
-    data = feeSharingProxy.setImplementation.encode_input(feeSharing.address)
-    sendWithMultisig(conf.contracts['multisig'], feeSharingProxy.address, data, conf.acct)
+    feeSharingProxy.setImplementation(feeSharing.address)
 
-    # Redeploy protocol settings
-    replaceProtocolSettings()
+    staking = Contract.from_abi("StakingTN", address=conf.contracts['StakingProxyTN'], abi=StakingTN.abi, owner=conf.acct)
 
-    # Redeploy swaps external
-    redeploySwapsExternal()
-
-    # Set Fees Controller
-    setFeesController(feeSharingProxy.address)
+    # set fee sharing
+    staking.setFeeSharing(feeSharingProxy.address)
 
 def deployFeeSharingProxy():
     print("Deploy fee sharing proxy")
@@ -358,10 +353,6 @@ def deployFeeSharingProxy():
     print(feeSharingProxy.address)
     print('Proxy owner: ', feeSharingProxy.getProxyOwner())
     print('FeeSharingProxy ownership: ', feeSharingProxy.owner())
-    feeSharingProxy.setProxyOwner(conf.contracts['multisig'])
-    feeSharingProxy.transferOwnership(conf.contracts['multisig'])
-    print('New proxy owner: ', feeSharingProxy.getProxyOwner())
-    print('New FeeSharingProxy ownership: ', feeSharingProxy.owner())
 
 def setSupportedTokens(tokenAddresses, supported):
     sovryn = Contract.from_abi("sovryn", address=conf.contracts['sovrynProtocol'], abi=interface.ISovrynBrownie.abi, owner=conf.acct)
