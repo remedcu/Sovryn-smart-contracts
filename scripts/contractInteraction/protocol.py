@@ -347,6 +347,15 @@ def deployConversionFeeSharingToWRBTC():
     # set fee sharing
     staking.setFeeSharing(feeSharingProxy.address)
 
+    # Redeploy protocol settings
+    replaceProtocolSettings()
+
+    # Redeploy swaps external
+    redeploySwapsExternal()
+
+    # Set Fees Controller
+    setFeesController(feeSharingProxy.address)
+
 def deployFeeSharingProxy():
     print("Deploy fee sharing proxy")
     feeSharingProxy = conf.acct.deploy(FeeSharingProxy, conf.contracts['sovrynProtocol'], conf.contracts['StakingTN'])
