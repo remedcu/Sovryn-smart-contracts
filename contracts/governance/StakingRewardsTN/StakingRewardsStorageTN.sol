@@ -65,4 +65,17 @@ contract StakingRewardsStorageTN is Ownable {
 
 	/// @notice Represents the time when the contract is upgraded
 	uint256 public upgradeTime;
+
+	/**
+	 * @dev lastStakingActivityTime and lastStakingActivityBlock are used to track the time and block for a staking
+	 * activity. This is used to pass the block when the staking activity was done instead of
+	 * the latest block (only for the first interval after a staking event)
+	 */
+	struct LastStakingActivity {
+		uint128 lastStakingActivityTime;
+		uint128 lastStakingActivityBlock;
+	}
+
+	/// Staker => Staking Activity time and block
+	mapping(address => LastStakingActivity) public stakingActivity;
 }

@@ -96,6 +96,11 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 	 * */
 	function updateRewards(address receiver) external {
 		require(msg.sender == address(staking), "unauthorized");
+		//Start of the interval and last finalised block right before a staking activity
+		stakingActivity[receiver] = LastStakingActivity({ 
+			lastStakingActivityTime: uint128(staking.timestampToLockDate(block.timestamp)), 
+			lastStakingActivityBlock: uint128(_getCurrentBlockNumber() - 1)
+		});
 		_calculateRewards(receiver);
 	}
 
@@ -209,7 +214,12 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 				referenceBlock = lastFinalisedBlock.sub(((currentTS.sub(i)).div(32)));
 				if (referenceBlock < deploymentBlock) referenceBlock = deploymentBlock;
 			} else {
-				referenceBlock = lastFinalisedBlock;
+				//Sets block number at which the activity occured and use it for calculating rewards for the same interval
+				if (i == stakingActivity[staker].lastStakingActivityTime) {
+					referenceBlock = stakingActivity[staker].lastStakingActivityBlock;
+				} else {
+					referenceBlock = lastFinalisedBlock;
+				}
 			}
 			weightedStake = weightedStake.add(_computeRewardForDate(staker, referenceBlock, i));
 		}
