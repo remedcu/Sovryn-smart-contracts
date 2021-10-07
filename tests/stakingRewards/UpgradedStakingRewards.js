@@ -98,7 +98,7 @@ contract("StakingRewardsTN - Upgrade", (accounts) => {
 			await staking.stake(wei("50000", "ether"), inTwoYears, a2, a2, { from: a2 });
 		});
 
-		it("should account for stakes made till start date of the program for a1", async () => {			
+		it("should account for stakes made till start date of the program for a1", async () => {
 			let numOfIntervals = 2;
 			let totalAmount = 0;
 			let fullTermAvg;
