@@ -164,6 +164,10 @@ def updateAddresses():
     print(stakingRewardsProxy)
 
     # Get the fee sharing proxy contract instance
+    feeSharingProxy = Contract.from_abi("FeeSharingProxy", address=conf.contracts['FeeSharingProxy'], abi=FeeSharingProxy.abi, owner=conf.acct)
+    print(feeSharingProxy)
+
+    # Get the fee sharing proxy contract instance
     #feeSharingProxy = conf.contracts[FeeSharingProxy]
 
     #Send with Multisig
@@ -171,9 +175,9 @@ def updateAddresses():
     #print(data)
 
     #Send with Multisig
-    stakingProxy.setStakingRewards(stakingRewardsProxy)
+    #stakingProxy.setStakingRewards(stakingRewardsProxy)
     #print(data)
 
     #Send with Multisig
-    #data = stakingProxy.setFeeSharing(feeSharingProxy)
+    stakingProxy.setFeeSharing(feeSharingProxy)
     #print(data)

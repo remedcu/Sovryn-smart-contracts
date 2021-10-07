@@ -98,145 +98,46 @@ contract("StakingRewardsTN - Upgrade", (accounts) => {
 			await staking.stake(wei("50000", "ether"), inTwoYears, a2, a2, { from: a2 });
 		});
 
-		it("should account for stakes made till start date of the program for a1", async () => {
-			await increaseTimeAndBlocks(1209614);
-
-			let fields = await stakingRewards.getStakerCurrentReward(true, { from: a1 });
-			let numOfIntervals = 1;
-			let fullTermAvg = avgWeight(26, 27, 9, 78);
-			let expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-		});
-
-		it("should account for stakes made till start date of the program for a2", async () => {
-			let numOfIntervals = 1;
-			fields = await stakingRewards.getStakerCurrentReward(true, { from: a2 });
-			fullTermAvg = avgWeight(52, 53, 9, 78);
-			expectedAmount = numOfIntervals * ((50000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-
-			fields = await stakingRewards.getStakerCurrentReward(true, { from: a3 });
-			fullTermAvg = avgWeight(78, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((10000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-		});
-
-		it("should account for stakes made till start date of the program for a3", async () => {
-			let numOfIntervals = 1;
-			fields = await stakingRewards.getStakerCurrentReward(true, { from: a3 });
-			fullTermAvg = avgWeight(78, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((10000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-		});
-
-		it("should compute and send Rewards to the stakers a1, a2 and a3 correctly after 4 weeks", async () => {
-			await increaseTimeAndBlocks(1209614);
-			let fields = await stakingRewards.getStakerCurrentReward(true, { from: a1 });
+		it("should account for stakes made till start date of the program for a1", async () => {			
 			let numOfIntervals = 2;
-			let fullTermAvg = avgWeight(25, 27, 9, 78);
+			let totalAmount = 0;
+			let fullTermAvg;
+			let expectedAmount;
+
+			fullTermAvg = avgWeight(37, 39, 9, 78);
 			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-			fields = await stakingRewards.getStakerCurrentReward(true, { from: a2 });
-			fullTermAvg = avgWeight(51, 53, 9, 78);
-			expectedAmount = numOfIntervals * ((50000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
+			fullTermAvg = avgWeight(41, 43, 9, 78);
+			expectedAmount = numOfIntervals * ((5000 * fullTermAvg) / 26);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-			fields = await stakingRewards.getStakerCurrentReward(true, { from: a3 });
-			fullTermAvg = avgWeight(77, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((10000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-		});
+			fullTermAvg = avgWeight(63, 65, 9, 78);
+			expectedAmount = numOfIntervals * ((3000 * fullTermAvg) / 26);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-		it("should upgrade the staking contracts", async () => {
-			const newStakingLogic = await StakingLogicNew.new();
-			await stakingObj.setImplementation(newStakingLogic.address);
-			staking = await StakingLogicNew.at(stakingObj.address);
-			const newImplementation = await stakingObj.getImplementation();
-
-			expect(newImplementation).to.be.equal(newStakingLogic.address);
-		});
-
-		it("should upgrade the staking rewards contracts", async () => {
-			const newStakingRewardsLogic = await StakingRewardsNew.new();
-			await stakingRewardsObj.setImplementation(newStakingRewardsLogic.address);
-			stakingRewards = await StakingRewardsNew.at(stakingRewardsObj.address);
-			const newImplementation = await stakingRewardsObj.getImplementation();
-
-			expect(newImplementation).to.be.equal(newStakingRewardsLogic.address);
-			//Initialize
-			await stakingRewards.setBlockMockUpAddr(blockMockUp.address);
-			await staking.setBlockMockUpAddr(blockMockUp.address);
-			await staking.setStakingRewards(stakingRewards.address);
-			await stakingRewards.setStakingAddress(staking.address);
-
-			//FeeSharingProxy
-			let feeSharingLogic = await FeeSharingLogic.new();
-			feeSharingProxyObj = await FeeSharingProxy.new(protocol.address, staking.address);
-			await feeSharingProxyObj.setImplementation(feeSharingLogic.address);
-			feeSharingProxy = await FeeSharingLogic.at(feeSharingProxyObj.address);
-			await staking.setFeeSharing(feeSharingProxy.address);
-		});
-
-		it("should compute and send Rewards to the stakers a1, a2 and a3 correctly after 6 weeks", async () => {
-			await increaseTimeAndBlocks(1209614);
-			let fields = await stakingRewards.getStakerCurrentReward(true, a1, { from: a1 });
-			let numOfIntervals = 3;
-			let fullTermAvg = avgWeight(24, 27, 9, 78);
+			fullTermAvg = avgWeight(66, 68, 9, 78);
 			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
+			console.log(new BN(Math.floor(totalAmount * 10 ** 10)).toString());
 
-			fields = await stakingRewards.getStakerCurrentReward(true, a2, { from: a2 });
-			fullTermAvg = avgWeight(50, 53, 9, 78);
-			expectedAmount = numOfIntervals * ((50000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
+			//Ororo
+			numOfIntervals = 15;
+			fullTermAvg = avgWeight(27, 42, 9, 78);
+			expectedAmt = numOfIntervals * ((1000 * fullTermAvg) / 26);
+			let total = 0;
+			total = total + expectedAmt;
+			console.log(new BN(Math.floor(expectedAmt * 10 ** 10)).toString());
 
-			fields = await stakingRewards.getStakerCurrentReward(true, a3, { from: a3 });
-			fullTermAvg = avgWeight(76, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((10000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(
-				new BN(fields.amount).div(new BN(10).pow(new BN(8)))
-			);
-		});
-
-		it("should compute and send Rewards to the stakers a1, a2 and a3 correctly after 8 weeks", async () => {
-			await increaseTimeAndBlocks(1209614);
-			await staking.stake(wei("1000", "ether"), inOneYear, a1, a1, { from: a1 }); //Add Stakes
-			let fields = await stakingRewards.getClaimableReward(true, { from: a1 });
-			let numOfIntervals = 4;
-			let fullTermAvg = avgWeight(23, 27, 9, 78);
-			expectedAmount = numOfIntervals * ((2000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(new BN(fields).div(new BN(10).pow(new BN(8))));
-
-			await staking.extendStakingDuration(inTwoYears, inThreeYears, { from: a2 }); //Extend Duration
-			fields = await stakingRewards.getClaimableReward(true, { from: a2 });
-			fullTermAvg = avgWeight(75, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((50000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(new BN(fields).div(new BN(10).pow(new BN(8))));
-
-			await staking.withdraw(wei("1000", "ether"), inThreeYears, a3, { from: a3 }); //Withdraw
-			fields = await stakingRewards.getClaimableReward(true, { from: a3 });
-			fullTermAvg = avgWeight(75, 79, 9, 78);
-			expectedAmount = numOfIntervals * ((9000 * fullTermAvg) / 26);
-			expect(new BN(Math.floor(expectedAmount * 10 ** 10))).to.be.bignumber.equal(new BN(fields).div(new BN(10).pow(new BN(8))));
+			fullTermAvg = avgWeight(63, 78, 9, 78);
+			expectedAmt = numOfIntervals * ((1000 * fullTermAvg) / 26);
+			total = total + expectedAmt;
+			console.log(new BN(Math.floor(expectedAmt * 10 ** 10)).toString());
+			console.log(new BN(Math.floor(total * 10 ** 10)).toString());
 		});
 	});
 
