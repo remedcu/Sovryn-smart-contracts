@@ -124,12 +124,12 @@ def upgradeStakingRewards():
     stakingRewardsProxy.setImplementation(stakingRewards.address)
 
       # Get the logic contract instance
-    stakingRewardsLogic = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=conf.acct)
-    print(stakingRewardsLogic)
-    stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingProxyTN'], abi=StakingProxyTN.abi, owner=conf.acct)
-    print(stakingProxy)
+    # stakingRewardsLogic = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=conf.acct)
+    # print(stakingRewardsLogic)
+    # stakingProxy = Contract.from_abi("StakingProxyTN", address=conf.contracts['StakingProxyTN'], abi=StakingProxyTN.abi, owner=conf.acct)
+    # print(stakingProxy)
 
-    stakingRewardsLogic.setStakingAddress(stakingProxy.address)
+    #stakingRewardsLogic.setStakingAddress(stakingProxy.address)
 
 #Upgrade Vesting Registry
 
