@@ -101,10 +101,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 		_calculateRewards(receiver);
 		//Sets the time and block for the first staking activity in an interval
 		if (lastInterval != stakingActivity[receiver].lastStakingActivityTime) {
-			stakingActivity[receiver] = LastStakingActivity({
-				lastStakingActivityTime: lastInterval,
-				lastStakingActivityBlock: lastBlock
-			});	
+			stakingActivity[receiver] = LastStakingActivity({ lastStakingActivityTime: lastInterval, lastStakingActivityBlock: lastBlock });
 		}
 	}
 
