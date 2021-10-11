@@ -79,15 +79,15 @@ def main():
     #stakeTokens(1000, 6739200, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #readStakingKickOff()
     #getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
-    #getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
-    #getRewards("0x9E0816a71B53ca67201a5088df960fE90910DE55")
+    getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    getRewards("0x9E0816a71B53ca67201a5088df960fE90910DE55")
     #getImplementation()
 
     #Bundle Deployment
     #upgradeStaking()
     #deployFeeSharingProxy()
     #deployConversionFeeSharingToWRBTC()
-    upgradeStakingRewards()
+    #upgradeStakingRewards()
     #updateAddresses()
 
     #kickOff: Monday, 20 September 2021 19:58:28 - 1632148108

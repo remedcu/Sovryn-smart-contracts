@@ -99,45 +99,43 @@ contract("StakingRewardsTN - Upgrade", (accounts) => {
 		});
 
 		it("should account for stakes made till start date of the program for a1", async () => {
-			let numOfIntervals = 1;
+			let numOfIntervals = 2;
 			let totalAmount = 0;
 			let fullTermAvg;
 			let expectedAmount;
 
-			fullTermAvg = avgWeight(36, 37, 9, 78);
+			fullTermAvg = avgWeight(33, 35, 9, 78);
 			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
 			totalAmount = totalAmount + expectedAmount;
 			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-			fullTermAvg = avgWeight(40, 41, 9, 78);
+			fullTermAvg = avgWeight(37, 39, 9, 78);
 			expectedAmount = numOfIntervals * ((5000 * fullTermAvg) / 26);
 			totalAmount = totalAmount + expectedAmount;
 			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-			fullTermAvg = avgWeight(62, 63, 9, 78);
+			fullTermAvg = avgWeight(59, 61, 9, 78);
 			expectedAmount = numOfIntervals * ((3000 * fullTermAvg) / 26);
 			totalAmount = totalAmount + expectedAmount;
 			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 
-			fullTermAvg = avgWeight(65, 66, 9, 78);
+			fullTermAvg = avgWeight(62, 64, 9, 78);
+			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
+
+			numOfIntervals = 2;
+			fullTermAvg = avgWeight(73, 75, 9, 78);
+			expectedAmount = numOfIntervals * ((2000 * fullTermAvg) / 26);
+			totalAmount = totalAmount + expectedAmount;
+			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
+
+			numOfIntervals = 1;
+			fullTermAvg = avgWeight(73, 74, 9, 78);
 			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
 			totalAmount = totalAmount + expectedAmount;
 			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
 			console.log(new BN(Math.floor(totalAmount * 10 ** 10)).toString());
-
-			//Ororo
-			numOfIntervals = 16;
-			fullTermAvg = avgWeight(26, 42, 9, 78);
-			expectedAmt = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			let total = 0;
-			total = total + expectedAmt;
-			console.log(new BN(Math.floor(expectedAmt * 10 ** 10)).toString());
-
-			fullTermAvg = avgWeight(62, 78, 9, 78);
-			expectedAmt = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			total = total + expectedAmt;
-			console.log(new BN(Math.floor(expectedAmt * 10 ** 10)).toString());
-			console.log(new BN(Math.floor(total * 10 ** 10)).toString());
 		});
 	});
 
