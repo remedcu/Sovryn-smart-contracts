@@ -98,9 +98,9 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 		require(msg.sender == address(staking), "unauthorized");
 		uint128 lastInterval = uint128(staking.timestampToLockDate(block.timestamp));
 		uint128 lastBlock = uint128(_getCurrentBlockNumber() - 1);
-		_calculateRewards(receiver);
 		//Sets the time and block for the first staking activity in an interval
 		if (lastInterval != stakingActivity[receiver].lastStakingActivityTime) {
+			_calculateRewards(receiver);
 			stakingActivity[receiver] = LastStakingActivity({ lastStakingActivityTime: lastInterval, lastStakingActivityBlock: lastBlock });
 		}
 	}
