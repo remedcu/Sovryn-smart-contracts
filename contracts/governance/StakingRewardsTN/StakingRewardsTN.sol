@@ -113,7 +113,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 		uint256 totalRewards = accumulatedRewards[_receiver];
 
 		(uint256 withdrawalTime, uint256 amount) = getStakerCurrentReward(true, _receiver);
-		if (withdrawalTime > 0 && amount > 0) {
+		if (withdrawalTime > 0) {
 			totalRewards += amount;
 			withdrawals[_receiver] = withdrawalTime;
 			accumulatedRewards[_receiver] = totalRewards;
@@ -224,9 +224,8 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 			weightedStake = weightedStake.add(_computeRewardForDate(staker, referenceBlock, i));
 		}
 
-		if (weightedStake == 0) return (0, 0);
 		lastWithdrawalInterval = duration;
-		amount = weightedStake.mul(BASE_RATE).div(DIVISOR);
+		amount = weightedStake > 0 ? weightedStake.mul(BASE_RATE).div(DIVISOR) : 0;
 	}
 
 	/**
