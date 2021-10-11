@@ -73,14 +73,19 @@ def main():
         #data = stakingProxy.getOwner()
         #print(data)
 
+    def setMaxDuration():
+        stakingRewards = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=conf.acct)
+        #stakingRewards.setMaxDuration(2592000)
+        print(stakingRewards.maxDuration())
+
     #call the functions you want here
     #stakeTokens("1000", "2246400", "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #stakeTokens(1000, 4492800, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #stakeTokens(1000, 6739200, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #readStakingKickOff()
     #getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
-    getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
-    getRewards("0x9E0816a71B53ca67201a5088df960fE90910DE55")
+    #getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
+    #getRewards("0x9E0816a71B53ca67201a5088df960fE90910DE55")
     #getImplementation()
 
     #Bundle Deployment
@@ -89,6 +94,7 @@ def main():
     #deployConversionFeeSharingToWRBTC()
     #upgradeStakingRewards()
     #updateAddresses()
+    #setMaxDuration()
 
     #kickOff: Monday, 20 September 2021 19:58:28 - 1632148108
     #Upgrade: Wednesday, 22 September 2021 19:50:08 - 1632320408

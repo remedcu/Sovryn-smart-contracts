@@ -48,6 +48,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 		require(_stakingAddr != address(0), "staking address invalid");
 		staking = IStaking(_stakingAddr);
 		upgradeTime = block.timestamp;
+		setMaxDuration(30 * TWO_WEEKS);
 	}
 
 	/**
@@ -200,6 +201,7 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 		uint256 lastStakingInterval = staking.timestampToLockDate(currentTS);
 		lastWithdrawalInterval = lastWithdrawal > 0 ? lastWithdrawal : startTime;
 		if (lastStakingInterval <= lastWithdrawalInterval) return (0, 0);
+		if (lastStakingInterval == stakingActivity[staker].lastStakingActivityTime) return (0, 0);
 
 		if (considerMaxDuration) {
 			uint256 addedMaxDuration;
