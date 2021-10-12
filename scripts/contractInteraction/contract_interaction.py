@@ -51,12 +51,12 @@ def main():
 
     def getRewards(acctAddress):
         stakingRewards = Contract.from_abi("StakingRewardsTN", address=conf.contracts['StakingRewardsProxyTN'], abi=StakingRewardsTN.abi, owner=acctAddress)
-        print(stakingRewards.getClaimableReward(False, {'from': acctAddress}))
+        print(stakingRewards.getClaimableReward(True, {'from': acctAddress}))
         #print(stakingRewards.deploymentBlock())
         #print(stakingRewards.startTime())
         #print(stakingRewards.upgradeTime())
         print(stakingRewards.accumulatedRewards(acctAddress))
-        a = stakingRewards.getClaimableReward(False, {'from': acctAddress})
+        a = stakingRewards.getClaimableReward(True, {'from': acctAddress})
         b = stakingRewards.accumulatedRewards(acctAddress)
         print(a-b)
         print(stakingRewards.withdrawals(acctAddress))
@@ -83,9 +83,12 @@ def main():
     #stakeTokens(1000, 4492800, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #stakeTokens(1000, 6739200, "0x511893483DCc1A9A98f153ec8298b63BE010A99f", "0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #readStakingKickOff()
-    #getDetails("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
     #getRewards("0x511893483DCc1A9A98f153ec8298b63BE010A99f")
-    #getRewards("0x9E0816a71B53ca67201a5088df960fE90910DE55")
+    # getRewards("0x8517ECce55f6D11e4A60eddbB7f4090dd2aC19E7")
+    # getRewards("0xC6138eC6c65e3280e720d4E6da0FD91A061351c4")
+    # getRewards("0x49d99a6821B7569f8D409728eD1D3EF5bF1befa9")
+    getRewards("0xBf151ed43445a093E991211d46A34f60F02a9E09")
+    # getRewards("0xC4fc1021aAFa8Dfdb02C544D264638b18673aC94")
     #getImplementation()
 
     #Bundle Deployment

@@ -99,42 +99,17 @@ contract("StakingRewardsTN - Upgrade", (accounts) => {
 		});
 
 		it("should account for stakes made till start date of the program for a1", async () => {
-			let numOfIntervals = 2;
+			let numOfIntervals;
 			let totalAmount = 0;
 			let fullTermAvg;
 			let expectedAmount;
 
-			fullTermAvg = avgWeight(33, 35, 9, 78);
-			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
-
-			fullTermAvg = avgWeight(37, 39, 9, 78);
-			expectedAmount = numOfIntervals * ((5000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
-
-			fullTermAvg = avgWeight(59, 61, 9, 78);
-			expectedAmount = numOfIntervals * ((3000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
-
-			fullTermAvg = avgWeight(62, 64, 9, 78);
-			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
-
-			numOfIntervals = 2;
-			fullTermAvg = avgWeight(73, 75, 9, 78);
-			expectedAmount = numOfIntervals * ((2000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
-
-			numOfIntervals = 1;
-			fullTermAvg = avgWeight(73, 74, 9, 78);
-			expectedAmount = numOfIntervals * ((1000 * fullTermAvg) / 26);
-			totalAmount = totalAmount + expectedAmount;
-			console.log(new BN(Math.floor(expectedAmount * 10 ** 10)).toString());
+			//Stan
+			numOfIntervals = 5;
+			fullTermAvg = avgWeight(23, 28, 9, 78);
+			expectedAmt = numOfIntervals * ((1000 * fullTermAvg) / 26);
+			totalAmount = totalAmount + expectedAmt;
+			console.log(new BN(Math.floor(expectedAmt * 10 ** 10)).toString());
 			console.log(new BN(Math.floor(totalAmount * 10 ** 10)).toString());
 		});
 	});
