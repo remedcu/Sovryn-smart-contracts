@@ -214,8 +214,8 @@ contract StakingRewardsTN is StakingRewardsStorageTN {
 				referenceBlock = lastFinalisedBlock.sub(((currentTS.sub(i)).div(32)));
 				if (referenceBlock < deploymentBlock) referenceBlock = deploymentBlock;
 			} else {
-				//Sets block number at which the activity occured and use it for calculating rewards for the same interval
-				if (i == stakingActivity[staker].lastStakingActivityTime) {
+				//Sets block number at which the activity occured and use it for calculating rewards for all previous intervals
+				if (i <= stakingActivity[staker].lastStakingActivityTime) {
 					referenceBlock = stakingActivity[staker].lastStakingActivityBlock;
 				} else {
 					referenceBlock = lastFinalisedBlock;
